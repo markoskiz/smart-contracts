@@ -15,8 +15,8 @@ contract ChainLinkCasino is VRFConsumerBaseV2 {
 
     uint64 public subscriptionId;
     bytes32 public keyHash;
-    uint32 public callbackGasLimit = 100000;
-    uint16 public requestConfirmations = 1; // za testiranje stavame 1, povisok broj posigurno
+    uint32 public callbackGasLimit = 200000; // Increased gas limit
+    uint16 public requestConfirmations = 3;  // Increased confirmations
     uint32 public numWords = 1;
 
     mapping(uint256 => address) public requestToPlayer;
@@ -44,12 +44,14 @@ contract ChainLinkCasino is VRFConsumerBaseV2 {
         emit PlayRequested(msg.sender, requestId);
     }
 
+    // Add cleanup in fulfillRandomWords
     function fulfillRandomWords(
-    uint256 requestId,
-    uint256[] memory randomWords
+        uint256 requestId,
+        uint256[] memory randomWords
     ) internal override {
         address player = requestToPlayer[requestId];
-        uint8 number = uint8(randomWords[0] % 37); // Number from 0 to 36
+        uint8 number = uint8(randomWords[0] % 37);
         emit PlayResult(player, number);
+        delete requestToPlayer[requestId]; // Cleanup
     }
 }
